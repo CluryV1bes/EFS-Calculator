@@ -190,7 +190,7 @@
         function formatExp(num) {
             if (isNaN(num) || num <= 0) return "Invalid";
             let exp = Math.log10(num);
-            return `1e${exp.toFixed(2)}`;
+            return `1e${Math.floor(exp)}`;
         }
 
         function showInputPage() {
