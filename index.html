@@ -128,8 +128,8 @@
 <body>
 
     <div class="calculator-container">
-        <h1>Game Stat Calculator</h1>
-        <p class="subtitle">Enter your stats below to calculate output</p>
+        <h1>Egg Farm Simulator Black Eggs Calculator</h1>
+        <p class="subtitle">Enter your Information below to Calculate your Black Eggs (BE)</p>
 
         <form id="calcForm">
             <h1 style="font-size: 1rem; color: var(--text-muted); margin: 16px 0 8px 0; text-align: center;">Player's Information</h1>
@@ -138,7 +138,7 @@
                 <input type="text" id="statInput1" placeholder="e.g. 1e44" required>
             </div>
             <div class="input-group">
-                <label for="statInput2">Water Egg %</label>
+                <label for="statInput2">Water Egg (%)</label>
                 <input type="number" id="statInput2" placeholder="Decimal Value (e.g. 0.05)" required>
             </div>
 
@@ -164,8 +164,8 @@
         </form>
 
         <div class="result-box">
-            <div class="result-label">Recommended Targets</div>
-            <div id="resultOutput" class="result-value">Enter values above and click Calculate.</div>
+            <div class="result-label">Recommended Black Eggs (BEs)</div>
+            <div id="resultOutput" class="result-value">Enter the Values above & Click Calculate.</div>
         </div>
     </div>
 
@@ -208,10 +208,10 @@
 
             // Display results
             let html = `
-                <div>• <strong>Good Knight Target:</strong> ${formatExp(gkTarget)}</div>
-                <div>• <strong>Main 7 Target:</strong> ${formatExp(main7Target)}</div>
-                <div>• <strong>Turtle Target:</strong> ${formatExp(turtleTarget)}</div>
-                <div style="margin-top: 6px; font-size: 0.85rem; color: #aaa;">Water Egg Bonus Factor: +${(waterEgg * 100)}% distributed across eggs.</div>
+                <div>• <strong>Good Knight BEs:</strong> ${formatExp(gkTarget)}</div>
+                <div>• <strong>Main 7 BEs:</strong> ${formatExp(main7Target)}</div>
+                <div>• <strong>Turtle BEs:</strong> ${formatExp(turtleTarget)}</div>
+                <div style="margin-top: 6px; font-size: 0.85rem; color: #aaa;">Water Egg Bonus: +${(waterEgg * 100)}% distributed across eggs.</div>
             `;
 
             document.getElementById('resultOutput').innerHTML = html;
