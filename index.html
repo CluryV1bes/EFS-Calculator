@@ -38,7 +38,7 @@
             border-radius: 12px;
             padding: 30px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
         }
 
@@ -138,44 +138,43 @@
         <!-- PAGE 1: INPUT FORM -->
         <div id="inputPage">
             <p class="subtitle">Enter your Information below to Calculate your Black Eggs (BEs)</p>
-            <form id="calcForm" onsubmit="event.preventDefault(); calculate();">
-                <h1 style="font-size: 1rem; color: var(--text-muted); margin: 16px 0 8px 0; text-align: center;">Player's Information</h1>
-                <div class="input-group">
-                    <label for="statInput1">Black Eggs Number (BEs)</label>
-                    <input type="text" id="statInput1" placeholder="e.g. 1e44" required>
-                </div>
-                <div class="input-group">
-                    <label for="statInput2">Water Egg (%)</label>
-                    <input type="number" step="any" id="statInput2" placeholder="Decimal Value (e.g. 0.05)" required>
-                </div>
+            
+            <h1 style="font-size: 1rem; color: var(--text-muted); margin: 16px 0 8px 0; text-align: center;">Player's Information</h1>
+            <div class="input-group">
+                <label for="statInput1">Black Eggs Number (BEs)</label>
+                <input type="text" id="statInput1" placeholder="e.g. 2e4457">
+            </div>
+            <div class="input-group">
+                <label for="statInput2">Water Egg Level (0 - 150)</label>
+                <input type="number" step="1" min="0" max="150" oninput="if(this.value < 0) this.value = 0;" id="statInput2" placeholder="e.g. 16">
+            </div>
 
-                <h1 style="font-size: 1rem; color: var(--text-muted); margin: 16px 0 8px 0; text-align: center;">Your Current Easter Egg Levels</h1>
-                <div class="input-group">
-                    <label for="statInput3">Good Knight Egg (GK)</label>
-                    <input type="text" id="statInput3" placeholder="e.g. 1e44" required>
-                </div>
-                <div class="input-group">
-                    <label for="statInput4">Main 7 Eggs</label>
-                    <input type="text" id="statInput4" placeholder="e.g. 1e44" required>
-                </div>
-                <div class="input-group">
-                    <label for="statInput5">Turtle Egg</label>
-                    <input type="text" id="statInput5" placeholder="e.g. 1e44" required>
-                </div>
-                <div class="input-group">
-                    <label for="statInput6">Miscellaneous 13 Eggs</label>
-                    <input type="number" id="statInput6" placeholder="e.g. 222" required>
-                </div>
+            <h1 style="font-size: 1rem; color: var(--text-muted); margin: 16px 0 8px 0; text-align: center;">Your Current Easter Egg Levels (Optional)</h1>
+            <div class="input-group">
+                <label for="statInput3">Good Knight Egg (GK)</label>
+                <input type="text" id="statInput3" placeholder="e.g. 2.975e4418">
+            </div>
+            <div class="input-group">
+                <label for="statInput4">Main 7 Eggs</label>
+                <input type="text" id="statInput4" placeholder="e.g. 1.32e2209">
+            </div>
+            <div class="input-group">
+                <label for="statInput5">Turtle Egg</label>
+                <input type="text" id="statInput5" placeholder="e.g. 3.270e1767">
+            </div>
+            <div class="input-group">
+                <label for="statInput6">Miscellaneous 13 Eggs (Current Level)</label>
+                <input type="number" min="0" oninput="if(this.value < 0) this.value = 0;" id="statInput6" placeholder="e.g. 14671">
+            </div>
 
-                <button type="submit">Calculate</button>
-            </form>
+            <button type="button" onclick="calculate()">Calculate</button>
         </div>
 
         <!-- PAGE 2: RESULTS VIEW -->
         <div id="resultPage" class="hidden">
             <p class="subtitle">Calculation Complete</p>
             <div class="result-box">
-                <div class="result-label">Recommended Black Eggs (BEs)</div>
+                <div class="result-label">Recommended Target vs Needed</div>
                 <div id="resultOutput" class="result-value"></div>
             </div>
             <button type="button" onclick="goBack()">← Go Back & Reset</button>
@@ -183,18 +182,30 @@
     </div>
 
     <script>
-        function parseValue(val) {
-            return parseFloat(val);
-        }
-
-        function formatExp(num) {
-            if (isNaN(num) || num <= 0) return "Invalid";
-            let exp = Math.log10(num);
-            return `1e${Math.floor(exp)}`;
+        function parseScientific(str) {
+            str = str.trim().toLowerCase();
+            if (!str) return null;
+            if (str.includes('e')) {
+                let parts = str.split('e');
+                let base = parseFloat(parts[0]);
+                let exp = parseFloat(parts[1]);
+                if (isNaN(base) || isNaN(exp) || base <= 0) return { base: 1, exp: -Infinity };
+                return { base: base, exp: exp };
+            } else {
+                let num = parseFloat(str);
+                if (isNaN(num)) return null;
+                if (num <= 0) return { base: 1, exp: -Infinity };
+                return { base: 1, exp: Math.log10(num) };
+            }
         }
 
         function showInputPage() {
-            document.getElementById('calcForm').reset(); // Clears all fields
+            document.getElementById('statInput1').value = '';
+            document.getElementById('statInput2').value = '';
+            document.getElementById('statInput3').value = '';
+            document.getElementById('statInput4').value = '';
+            document.getElementById('statInput5').value = '';
+            document.getElementById('statInput6').value = '';
             document.getElementById('resultPage').classList.add('hidden');
             document.getElementById('inputPage').classList.remove('hidden');
         }
@@ -204,52 +215,93 @@
             document.getElementById('resultPage').classList.remove('hidden');
         }
 
-        function calculate() {
-            let besVal = parseValue(document.getElementById('statInput1').value);
-            let waterEgg = parseValue(document.getElementById('statInput2').value) || 0;
-            let gkCurrent = parseValue(document.getElementById('statInput3').value);
-            let main7Current = parseValue(document.getElementById('statInput4').value);
-            let turtleCurrent = parseValue(document.getElementById('statInput5').value);
-            let miscCurrent = parseValue(document.getElementById('statInput6').value);
+        function formatResult(targetExp, currentStr) {
+            let currentParsed = parseScientific(currentStr);
+            let targetExpRounded = Math.round(targetExp);
+            let html = `Target: 1e${targetExpRounded}`;
 
-            if (isNaN(besVal) || besVal <= 0) {
+            if (currentStr.trim() && currentParsed && !isNaN(currentParsed.exp)) {
+                html += `<div style="font-size: 0.85rem; color: #aaa; margin-left: 12px;">Current: ${currentStr.trim()}</div>`;
+
+                let currentTotalExp = currentParsed.exp + Math.log10(currentParsed.base);
+                let expDiff = targetExp - currentTotalExp;
+
+                if (expDiff <= 0) {
+                    html += `<div style="font-size: 0.85rem; color: #4cd137; margin-left: 12px;">Status: Target Reached! ✅</div>`;
+                } else if (expDiff < 15) {
+                    let factor = 1 - Math.pow(10, -expDiff);
+                    let diffExp = targetExp + Math.log10(factor);
+                    let wholeExp = Math.floor(diffExp);
+                    let mantissa = Math.pow(10, diffExp - wholeExp);
+
+                    let formattedDiff = wholeExp < 6 
+                        ? Math.round(Math.pow(10, diffExp)).toLocaleString() 
+                        : `${mantissa.toFixed(2)}e${wholeExp}`;
+
+                    html += `<div style="font-size: 0.85rem; color: #00d2d3; margin-left: 12px;">Amount to Add: ${formattedDiff}</div>`;
+                } else {
+                    html += `<div style="font-size: 0.85rem; color: #00d2d3; margin-left: 12px;">Amount to Add: ~1e${targetExpRounded} (Current is negligible)</div>`;
+                }
+            }
+            return html;
+        }
+
+        function calculate() {
+            let besInput = document.getElementById('statInput1').value;
+            let waterEggLevel = parseFloat(document.getElementById('statInput2').value) || 0;
+            let gkCurrent = document.getElementById('statInput3').value;
+            let main7Current = document.getElementById('statInput4').value;
+            let turtleCurrent = document.getElementById('statInput5').value;
+            let miscCurrentLevel = parseFloat(document.getElementById('statInput6').value) || 0;
+
+            let besParsed = parseScientific(besInput);
+            if (!besParsed || isNaN(besParsed.exp)) {
                 alert("Please enter a valid Black Eggs (BEs) number.");
                 return;
             }
 
-            // Rule 2: GoodKnight = 20% (1/5th) of Total BEs
-            let gkTarget = besVal * 0.2;
-            let expGK = Math.log10(gkTarget);
+            let totalExpBE = besParsed.exp + Math.log10(besParsed.base);
+            
+            let waterEggDiscountPercent = 100 * (1 - Math.pow(0.95, waterEggLevel));
+            let waterEggMultiplier = 1 - (waterEggDiscountPercent / 100);
 
-            // Rule 3: Main7 = (GK exponent - 1) / 2
+            let expGK = totalExpBE + Math.log10(0.2);
             let main7Exp = (expGK - 1) / 2;
-            let main7Target = Math.pow(10, main7Exp);
-
-            // Rule 4: Turtle = Main7 exponent * 80%
             let turtleExp = main7Exp * 0.8;
-            let turtleTarget = Math.pow(10, turtleExp);
 
-            // Populate results
+            let miscExpPerEgg = totalExpBE + Math.log10(0.10 / 13);
+            let effectiveMiscExp = miscExpPerEgg - Math.log10(waterEggMultiplier);
+            
+            let miscTargetLevel = Math.floor((effectiveMiscExp / Math.log10(2)) - 1);
+            let miscLevelsNeeded = miscTargetLevel - miscCurrentLevel;
+
+            let miscHtml = `Target Level: ${miscTargetLevel.toLocaleString()}`;
+            if (document.getElementById('statInput6').value.trim() !== '') {
+                miscHtml += `<div style="font-size: 0.85rem; color: #aaa; margin-left: 12px;">Current Level: ${miscCurrentLevel.toLocaleString()}</div>`;
+                if (miscLevelsNeeded <= 0) {
+                    miscHtml += `<div style="font-size: 0.85rem; color: #4cd137; margin-left: 12px;">Status: Target Reached! ✅</div>`;
+                } else {
+                    miscHtml += `<div style="font-size: 0.85rem; color: #00d2d3; margin-left: 12px;">Levels to Add: +${miscLevelsNeeded.toLocaleString()}</div>`;
+                }
+            }
+
             let html = `
-                <div>• <strong>Good Knight BEs:</strong> ${formatExp(gkTarget)}</div>
-                <div>• <strong>Main 7 BEs:</strong> ${formatExp(main7Target)}</div>
-                <div>• <strong>Turtle BEs:</strong> ${formatExp(turtleTarget)}</div>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: #aaa;">Water Egg Bonus: +${(waterEgg * 100).toFixed(2)}% distributed across eggs.</div>
+                <div style="margin-bottom: 10px;">• <strong>Good Knight:</strong><br>${formatResult(expGK, gkCurrent)}</div>
+                <div style="margin-bottom: 10px;">• <strong>Main 7:</strong><br>${formatResult(main7Exp, main7Current)}</div>
+                <div style="margin-bottom: 10px;">• <strong>Turtle:</strong><br>${formatResult(turtleExp, turtleCurrent)}</div>
+                <div style="margin-bottom: 10px;">• <strong>Misc 13 (each):</strong><br>${miscHtml}</div>
+                <div style="margin-top: 12px; font-size: 0.85rem; color: #ccc; border-top: 1px solid #444; padding-top: 8px;">Water Egg Level ${waterEggLevel}: ${waterEggDiscountPercent.toFixed(2)}% upgrade cost discount applied.</div>
             `;
 
             document.getElementById('resultOutput').innerHTML = html;
-
-            // Switch to results screen and add browser history entry
             showResultPage();
             history.pushState({ page: 'results' }, '', '#results');
         }
 
         function goBack() {
-            // Triggers browser back button behavior
             history.back();
         }
 
-        // Listen for the browser's left Back arrow click
         window.addEventListener('popstate', function(event) {
             if (event.state && event.state.page === 'results') {
                 showResultPage();
@@ -258,7 +310,6 @@
             }
         });
 
-        // Ensure clean state on initial load
         if (window.location.hash === '#results') {
             history.replaceState(null, '', window.location.pathname);
         }
